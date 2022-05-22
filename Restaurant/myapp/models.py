@@ -29,18 +29,26 @@ class Food(models.Model):
     
     def get_fields(self):
         def get_dynamic_fields(field):
-            if field.name == 'catagory':
-                return(field.name, self.catagory.name, field.get_internal_type())
-            else:
-                return(field.name, self.value_from_object(self), field.get_internal_type())
-            return[get_dynamic_fields(field) for field in self.__class__._meta.fields]
+            return (
+                (field.name, self.catagory.name, field.get_internal_type())
+                if field.name == 'catagory'
+                else (
+                    field.name,
+                    self.value_from_object(self),
+                    field.get_internal_type(),
+                )
+            )
         
     def get_fields(self):
         def get_dynamic_fields(field):
-            if field.name == 'restaurant':
-                return(field.name, self.restaurant.name, field.get_internal_type())
-            else:
-                return(field.name, self.value_from_object(self), field.get_internal_type())
-            return[get_dynamic_fields(field) for field in self.__class__._meta.fields]    
+            return (
+                (field.name, self.restaurant.name, field.get_internal_type())
+                if field.name == 'restaurant'
+                else (
+                    field.name,
+                    self.value_from_object(self),
+                    field.get_internal_type(),
+                )
+            )    
     
           

@@ -91,7 +91,7 @@ class PyAccess:
         if (
             self._im.mode == "P"
             and isinstance(color, (list, tuple))
-            and len(color) in [3, 4]
+            and len(color) in {3, 4}
         ):
             # RGB or RGBA value for a P image
             color = self._palette.getcolor(color, self._img)

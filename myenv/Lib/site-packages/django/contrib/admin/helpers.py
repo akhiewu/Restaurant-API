@@ -204,10 +204,8 @@ class AdminReadonlyField:
         return format_html('<label{}>{}{}</label>', flatatt(attrs), capfirst(label), self.form.label_suffix)
 
     def get_admin_url(self, remote_field, remote_obj):
-        url_name = 'admin:%s_%s_change' % (
-            remote_field.model._meta.app_label,
-            remote_field.model._meta.model_name,
-        )
+        url_name = f'admin:{remote_field.model._meta.app_label}_{remote_field.model._meta.model_name}_change'
+
         try:
             url = reverse(
                 url_name,
@@ -236,10 +234,7 @@ class AdminReadonlyField:
                 if getattr(attr, 'boolean', False):
                     result_repr = _boolean_icon(value)
                 else:
-                    if hasattr(value, "__html__"):
-                        result_repr = value
-                    else:
-                        result_repr = linebreaksbr(value)
+                    result_repr = value if hasattr(value, "__html__") else linebreaksbr(value)
             else:
                 if isinstance(f.remote_field, ManyToManyRel) and value is not None:
                     result_repr = ", ".join(map(str, value.all()))
@@ -308,7 +303,7 @@ class InlineAdminFormSet:
         empty_form = self.formset.empty_form
         meta_labels = empty_form._meta.labels or {}
         meta_help_texts = empty_form._meta.help_texts or {}
-        for i, field_name in enumerate(flatten_fieldsets(self.fieldsets)):
+        for field_name in flatten_fieldsets(self.fieldsets):
             if fk and fk.name == field_name:
                 continue
             if not self.has_change_permission or field_name in self.readonly_fields:
@@ -343,16 +338,19 @@ class InlineAdminFormSet:
 
     def inline_formset_data(self):
         verbose_name = self.opts.verbose_name
-        return json.dumps({
-            'name': '#%s' % self.formset.prefix,
-            'options': {
-                'prefix': self.formset.prefix,
-                'addText': gettext('Add another %(verbose_name)s') % {
-                    'verbose_name': capfirst(verbose_name),
+        return json.dumps(
+            {
+                'name': f'#{self.formset.prefix}',
+                'options': {
+                    'prefix': self.formset.prefix,
+                    'addText': gettext('Add another %(verbose_name)s')
+                    % {
+                        'verbose_name': capfirst(verbose_name),
+                    },
+                    'deleteText': gettext('Remove'),
                 },
-                'deleteText': gettext('Remove'),
             }
-        })
+        )
 
     @property
     def forms(self):
@@ -405,8 +403,7 @@ class InlineAdminForm(AdminForm):
         return AdminField(self.form, self.formset._pk_field.name, False)
 
     def fk_field(self):
-        fk = getattr(self.formset, "fk", None)
-        if fk:
+        if fk := getattr(self.formset, "fk", None):
             return AdminField(self.form, fk.name, False)
         else:
             return ""
